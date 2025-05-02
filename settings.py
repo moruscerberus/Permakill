@@ -1,0 +1,12 @@
+# settings.py
+
+WIDTH = 800
+HEIGHT = 600
+FPS = 60
+
+PLAYER_SPEED = 4
+ARENA_RADIUS = 250
+ARENA_CENTER = (WIDTH // 2, HEIGHT // 2)
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
