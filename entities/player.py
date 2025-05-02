@@ -1,6 +1,6 @@
+# entities/player.py
 import pygame
 from settings import *
-import math
 from entities.bullet import Bullet
 
 class Player:
@@ -11,7 +11,7 @@ class Player:
         self.max_health = 60
         self.regen = 0  # health per second
         self.bullet_speed = 500
-        self.move_speed = 3.5
+        self.move_speed = PLAYER_SPEED
         self.shoot_cooldown = 0.25
         self.time_since_last_shot = 0
 
@@ -37,27 +37,26 @@ class Player:
             if to_center.length() < ARENA_RADIUS - self.radius:
                 self.pos = new_pos
 
-        # Shooting (left click)
-        self.time_since_last_shot += dt
-        mouse_buttons = pygame.mouse.get_pressed()
-        if mouse_buttons[0] and self.time_since_last_shot > self.shoot_cooldown:
-            self.shoot()
-            self.time_since_last_shot = 0
-
-        # Bullets
         for bullet in self.bullets[:]:
             bullet.update(dt)
             if bullet.is_dead():
                 self.bullets.remove(bullet)
 
-        # Damage cooldown timer
+        self.time_since_last_shot += dt
         self.time_since_hit += dt
 
-        # Regen over time
         if self.regen > 0:
             self.health += self.regen * dt
             if self.health > self.max_health:
                 self.health = self.max_health
+
+    def try_shoot(self):
+        mouse_buttons = pygame.mouse.get_pressed()
+        if mouse_buttons[0] and self.time_since_last_shot > self.shoot_cooldown:
+            self.shoot()
+            self.time_since_last_shot = 0
+            return True
+        return False
 
     def shoot(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -68,13 +67,13 @@ class Player:
 
     def take_damage(self, amount):
         if self.health <= 0:
-            return  # Already dead
+            return
         self.health = max(0, self.health - amount)
+        self.time_since_hit = 0
         print(f"[DAMAGE] Took {amount}, health: {self.health}")
 
-
-
-    def draw(self, screen):
-        pygame.draw.circle(screen, WHITE, (int(self.pos.x), int(self.pos.y)), self.radius)
+    def draw(self, screen, camera):
+        color = WHITE if self.time_since_hit > 0.1 else (255, 50, 50)
+        pygame.draw.circle(screen, color, camera.apply(self.pos), self.radius)
         for bullet in self.bullets:
-            bullet.draw(screen)
+            bullet.draw(screen, camera)

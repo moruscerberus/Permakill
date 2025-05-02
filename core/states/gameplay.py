@@ -1,11 +1,12 @@
 # core/states/gameplay.py
-
 from settings import *
 from entities.player import Player
 from entities.enemy import Enemy
 from entities.reward import Reward
+from entities.effects import HitEffect
 from systems.arena import draw_arena
 from core.rewards import load_rewards, apply_reward
+from core.camera import Camera
 import pygame
 import random
 
@@ -21,7 +22,15 @@ class GamePlayState:
         self.reward_claimed = False
         self.reward_resume_timer = 0
         self.last_reward_score = -1
-        self.dead = False  # track death state
+        self.dead = False
+        self.camera = Camera()
+        self.effects = []
+
+        self.ring_pulse = 0
+
+        self.show_health_timer = 0
+
+
 
     def enter(self):
         self.player = Player()
@@ -35,6 +44,10 @@ class GamePlayState:
         self.reward_resume_timer = 0
         self.last_reward_score = -1
         self.dead = False
+        self.camera = Camera()
+        self.effects.clear()
+        self.show_health_timer = 0
+
 
     def player_is_dead(self):
         return self.player.health <= 0
@@ -59,22 +72,37 @@ class GamePlayState:
             return
 
         apply_reward(self.player, reward.data)
+        self.camera.shake(intensity=8, duration=0.3)
         self.reward_claimed = True
         self.in_reward_phase = False
         self.rewards.clear()
         self.reward_resume_timer = 1.0
+        self.ring_pulse = 6
+        self.camera.shake(intensity=6, duration=0.3)
+
+        if reward.health <= 1:
+            self.camera.shake(intensity=24, duration=0.2)
 
     def update(self, dt):
-        # Handle death check once
         if self.player_is_dead() and not self.dead:
-            print("[DEBUG] Player is dead")
             self.dead = True
             self.manager.set_state("game_over")
 
         if self.dead:
-            return  # Stop all game updates if dead
+            return
 
+        self.camera.update(dt)
         self.player.update(dt)
+
+        if self.player.try_shoot():
+            self.camera.shake(intensity=2, duration=0.05)
+            self.ring_pulse = 4
+
+
+        for fx in self.effects[:]:
+            fx.update(dt)
+            if fx.is_dead():
+                self.effects.remove(fx)
 
         if not self.in_reward_phase and not self.reward_claimed:
             self.spawn_timer += dt
@@ -91,6 +119,8 @@ class GamePlayState:
                         if enemy in self.enemies:
                             self.enemies.remove(enemy)
                             self.score += 50
+                            self.camera.shake(intensity=6, duration=0.2)
+                            self.effects.append(HitEffect(enemy.pos))
                         if bullet in self.player.bullets:
                             self.player.bullets.remove(bullet)
                         break
@@ -100,14 +130,20 @@ class GamePlayState:
                     if self.player.time_since_hit >= self.player.damage_cooldown:
                         self.player.take_damage(10)
                         self.player.time_since_hit = 0
+                        self.ring_pulse = 20
+                        self.show_health_timer = 2.0  # Show health bars for 2 seconds
+
 
             for enemy in self.enemies:
                 for bullet in enemy.bullets[:]:
                     if bullet.pos.distance_to(self.player.pos) < bullet.radius + self.player.radius:
                         self.player.take_damage(10)
                         enemy.bullets.remove(bullet)
+                        self.show_health_timer = 2.0
+                        self.ring_pulse = 20
 
-            # Trigger reward phase on score milestone
+            
+
             if self.score % 500 == 0 and self.score > 0 and not self.in_reward_phase:
                 if self.score != self.last_reward_score:
                     self.enter_reward_phase()
@@ -127,20 +163,25 @@ class GamePlayState:
                 self.reward_claimed = False
                 self.in_reward_phase = False
 
+        if self.ring_pulse > 0:
+            self.ring_pulse -= 60 * dt  # decay speed
+
+
     def draw(self):
         self.screen.fill(BLACK)
-        draw_arena(self.screen)
-        self.player.draw(self.screen)
-        for enemy in self.enemies:
-            enemy.draw(self.screen)
-        for reward in self.rewards:
-            reward.draw(self.screen)
+        draw_arena(self.screen, pulse=self.ring_pulse)
+        self.player.draw(self.screen, self.camera)
 
-        # Score display
+        for fx in self.effects:
+            fx.draw(self.screen, self.camera)
+        for enemy in self.enemies:
+            enemy.draw(self.screen, self.camera)
+        for reward in self.rewards:
+            reward.draw(self.screen, self.camera)
+
         score_text = self.font.render(f"{self.score}pts!", True, WHITE)
         self.screen.blit(score_text, score_text.get_rect(center=(WIDTH // 2, ARENA_CENTER[1] + ARENA_RADIUS + 30)))
 
-        # Health bar
         bar_width = 200
         bar_height = 20
         bar_x = WIDTH // 2 - bar_width // 2

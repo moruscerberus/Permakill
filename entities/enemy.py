@@ -49,8 +49,9 @@ class Enemy:
                 self.bullets.remove(b)
 
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (int(self.pos.x), int(self.pos.y)), self.radius)
+    def draw(self, screen, camera):
+        pygame.draw.circle(screen, (255, 80, 80), camera.apply(self.pos), self.radius)
+
         for b in self.bullets:
             b.draw(screen)
 

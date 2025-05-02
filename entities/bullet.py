@@ -14,8 +14,8 @@ class Bullet:
         self.pos += self.velocity * dt
         self.lifetime -= dt
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, WHITE, (int(self.pos.x), int(self.pos.y)), self.radius)
-
     def is_dead(self):
         return self.lifetime <= 0
+
+    def draw(self, screen, camera):
+        pygame.draw.circle(screen, WHITE, camera.apply(self.pos), self.radius)
