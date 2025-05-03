@@ -26,10 +26,19 @@ class Reward:
     def take_hit(self):
         if self.claimed:
             return
+
         self.health -= 1
         self.flash_timer = 0.1
+
+        # Calculate shake intensity: stronger as health drops
+        health_ratio = self.health / self.max_health
+        intensity = 4 + (1 - health_ratio) * 6  # shake: 4–10
+        if hasattr(self, "on_shake"):
+            self.on_shake(intensity)
+
         if self.health <= 0:
             self.claim()
+
 
 
     def claim(self):

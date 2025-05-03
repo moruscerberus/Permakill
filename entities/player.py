@@ -2,6 +2,8 @@
 import pygame
 from settings import *
 from entities.bullet import Bullet
+from core.assets import Assets
+import math
 
 class Player:
     def __init__(self):
@@ -57,13 +59,28 @@ class Player:
             self.time_since_last_shot = 0
             return True
         return False
-
+    
+    
     def shoot(self):
-        mouse_pos = pygame.mouse.get_pos()
-        dir_vec = pygame.Vector2(mouse_pos) - self.pos
-        if dir_vec.length_squared() == 0:
-            dir_vec = pygame.Vector2(1, 0)
-        self.bullets.append(Bullet(self.pos, dir_vec, self.bullet_speed))
+        mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
+        direction = (mouse_pos - self.pos).normalize()
+
+        # Perpendicular for gun spacing
+        perp = pygame.Vector2(-direction.y, direction.x)
+
+        # Gun positions
+        left_gun = self.pos + direction * 20 + perp * 10
+        right_gun = self.pos + direction * 20 - perp * 10
+
+        # Aim each gun *toward the cursor*
+        left_dir = (mouse_pos - left_gun).normalize()
+        right_dir = (mouse_pos - right_gun).normalize()
+
+        self.bullets.append(Bullet(left_gun, left_dir, self.bullet_speed))
+        self.bullets.append(Bullet(right_gun, right_dir, self.bullet_speed))
+
+
+
 
     def take_damage(self, amount):
         if self.health <= 0:
@@ -73,7 +90,14 @@ class Player:
         print(f"[DAMAGE] Took {amount}, health: {self.health}")
 
     def draw(self, screen, camera):
-        color = WHITE if self.time_since_hit > 0.1 else (255, 50, 50)
-        pygame.draw.circle(screen, color, camera.apply(self.pos), self.radius)
+        image = Assets.get('player')
+        if image:
+            mouse_pos = pygame.mouse.get_pos()
+            direction = pygame.Vector2(mouse_pos) - camera.apply(self.pos)
+            angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
+            rotated = pygame.transform.rotate(image, angle)
+            rect = rotated.get_rect(center=camera.apply(self.pos))
+            screen.blit(rotated, rect)
+
         for bullet in self.bullets:
             bullet.draw(screen, camera)
