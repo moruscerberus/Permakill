@@ -23,6 +23,12 @@ class Assets:
         cls.images['player'] = pygame.transform.scale(pygame.image.load('assets/sprites/player.png').convert_alpha(), (48, 48))
 
 
+        cls.fonts = {}
+        cls.fonts['main'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 32)
+        cls.fonts['small'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 20)
+
+
+
 
         # You can preload more here:
         # cls.images['enemy'] = ...

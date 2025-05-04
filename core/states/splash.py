@@ -2,13 +2,14 @@
 
 import pygame
 from settings import *
+from core.assets import Assets
 
 class SplashState:
     def __init__(self, manager, screen):
         self.manager = manager
         self.screen = screen
-        self.font_large = pygame.font.SysFont("consolas", 64)
-        self.font_small = pygame.font.SysFont("consolas", 32)
+        self.font_large = Assets.fonts['main']
+        self.font_small = Assets.fonts['small']
 
     def enter(self):
         self.timer = 2.0

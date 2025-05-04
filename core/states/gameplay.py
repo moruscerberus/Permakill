@@ -6,6 +6,7 @@ from entities.reward import Reward
 from entities.effects import HitEffect, RewardBurstEffect
 from systems.arena import draw_arena
 from core.rewards import load_rewards, apply_reward
+from core.assets import Assets
 from core.camera import Camera
 import pygame
 import random
@@ -15,7 +16,9 @@ class GamePlayState:
     def __init__(self, manager, screen):
         self.manager = manager
         self.screen = screen
-        self.font = pygame.font.SysFont("consolas", 32)
+
+        self.font = Assets.fonts['main']
+
 
         self.rewards_data = load_rewards()
         self.rewards = []

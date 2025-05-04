@@ -3,12 +3,13 @@
 import pygame
 from settings import *
 from core.highscore import load_high_score, save_high_score
+from core.assets import Assets
 
 class GameOverState:
     def __init__(self, manager, screen):
         self.manager = manager
         self.screen = screen
-        self.font = pygame.font.SysFont("consolas", 36)
+        self.font = Assets.fonts['main']
 
     def enter(self):
         print("[STATE] Game Over entered")

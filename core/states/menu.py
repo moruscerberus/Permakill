@@ -2,12 +2,13 @@
 
 import pygame
 from settings import *
+from core.assets import Assets
 
 class MenuState:
     def __init__(self, manager, screen):
         self.manager = manager
         self.screen = screen
-        self.font = pygame.font.SysFont("consolas", 32)
+        self.font = Assets.fonts['main']
 
     def enter(self):
         pass
