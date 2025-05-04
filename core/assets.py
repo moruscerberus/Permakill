@@ -16,10 +16,10 @@ class Assets:
     pygame.image.load('assets/sprites/cursor.png').convert_alpha(), (24, 24)
     )   
 
-        # === SHIP SPRITES ===
-        cls.images['enemy'] = ShipGenerator.generate_square(size=38)
-        cls.images['sniper'] = ShipGenerator.generate_triangle()
-        cls.images['bomber'] = ShipGenerator.generate_diamond()
+        # === SHIP SPRITES === 
+        cls.images['enemy'] =  pygame.transform.scale(pygame.image.load('assets/sprites/enemy.png').convert_alpha(), (32, 32))
+        cls.images['sniper'] = pygame.transform.scale(pygame.image.load('assets/sprites/sniper.png').convert_alpha(), (32, 32))
+        cls.images['bomber'] = pygame.transform.scale(pygame.image.load('assets/sprites/bomber.png').convert_alpha(), (32, 32))
         cls.images['player'] = pygame.transform.scale(pygame.image.load('assets/sprites/player.png').convert_alpha(), (48, 48))
 
 
