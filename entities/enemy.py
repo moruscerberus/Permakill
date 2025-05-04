@@ -81,7 +81,11 @@ class SniperEnemy(BaseEnemy):
 
     def fire(self):
         if self.locked_direction:
-            self.bullets.append(Bullet(self.pos, self.locked_direction, speed=350))
+            # Offset the bullet spawn slightly forward
+            muzzle_offset = self.locked_direction * 20
+            spawn_pos = self.pos + muzzle_offset
+            self.bullets.append(Bullet(spawn_pos, self.locked_direction, speed=350))
+
 
     def draw(self, screen, camera, player_pos):
         if self.is_aiming and self.locked_direction:
@@ -96,8 +100,13 @@ class SniperEnemy(BaseEnemy):
 
         image = Assets.get('sniper')
         if image:
-            rect = image.get_rect(center=camera.apply(self.pos))
-            screen.blit(image, rect)
+            # Rotate the sprite so the tip points toward the player
+            direction = player_pos - self.pos
+            angle = math.degrees(math.atan2(-direction.y, direction.x)) - 90
+            rotated = pygame.transform.rotate(image, angle)
+            rect = rotated.get_rect(center=camera.apply(self.pos))
+            screen.blit(rotated, rect)
+
         for bullet in self.bullets:
             bullet.draw(screen, camera)
 

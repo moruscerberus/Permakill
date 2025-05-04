@@ -13,8 +13,8 @@ class Assets:
         cls._loaded = True
 
         cls.images['cursor'] = pygame.transform.scale(
-    pygame.image.load('assets/sprites/cursor.png').convert_alpha(), (24, 24)
-    )   
+            pygame.image.load('assets/sprites/cursor.png').convert_alpha(), (24, 24)
+        )   
 
         # === SHIP SPRITES === 
         cls.images['enemy'] =  pygame.transform.scale(pygame.image.load('assets/sprites/enemy.png').convert_alpha(), (32, 32))
@@ -22,17 +22,19 @@ class Assets:
         cls.images['bomber'] = pygame.transform.scale(pygame.image.load('assets/sprites/bomber.png').convert_alpha(), (32, 32))
         cls.images['player'] = pygame.transform.scale(pygame.image.load('assets/sprites/player.png').convert_alpha(), (48, 48))
 
-
         cls.fonts = {}
         cls.fonts['main'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 32)
         cls.fonts['small'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 20)
 
-
-
-
-        # You can preload more here:
-        # cls.images['enemy'] = ...
-        # cls.images['bg'] = ...
+        # === SOUNDS ===
+        cls.sounds = {
+            'click': pygame.mixer.Sound('assets/sounds/click.wav'),
+            'hover': pygame.mixer.Sound('assets/sounds/hover.wav'),
+            'shoot': pygame.mixer.Sound('assets/sounds/shoot.wav'),
+            'hit': pygame.mixer.Sound('assets/sounds/hitHurt.wav'),
+            'explode': pygame.mixer.Sound('assets/sounds/explosion.wav'),
+            'powerup': pygame.mixer.Sound('assets/sounds/powerUp.wav'),
+        }
 
     @classmethod
     def get(cls, name):

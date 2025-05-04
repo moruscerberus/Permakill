@@ -1,36 +1,32 @@
-# systems/arena.py
-
 import pygame
 import math
 from settings import *
 
-def draw_arena(screen, pulse=0, show_health=False, health_ratio=1.0):
-    points = []
+def draw_arena(screen, radius=ARENA_RADIUS, center=ARENA_CENTER, health_ratio=1.0, pulse=0, show_health=False):
     tick = pygame.time.get_ticks() / 100
 
-    for angle in range(0, 360, 6):
+    # Increase canvas size to avoid clipping on pulse
+    base_size = 96
+    padding = 16
+    small_size = base_size + padding * 2
+    arena_surface = pygame.Surface((small_size, small_size), pygame.SRCALPHA)
+    center_px = base_size // 2 + padding
+
+    points = []
+    for angle in range(0, 360, 8):
         radians = math.radians(angle)
-        offset = math.sin(math.radians(angle * 4 + tick * 10)) * 6
-        radius = ARENA_RADIUS + offset + pulse
-        x = ARENA_CENTER[0] + radius * math.cos(radians)
-        y = ARENA_CENTER[1] + radius * math.sin(radians)
+        wobble = math.sin(math.radians(angle * 3 + tick * 4)) * 4
+        inner_wave = math.sin(radians * 5 + tick) * 2
+        offset = wobble + inner_wave
+        adjusted_radius = (base_size // 2 - 5 + pulse) + offset
+        x = center_px + adjusted_radius * math.cos(radians)
+        y = center_px + adjusted_radius * math.sin(radians)
         points.append((x, y))
 
-    pygame.draw.polygon(screen, WHITE, points, 2)
+    pygame.draw.polygon(arena_surface, WHITE, points, 1)
 
-    if show_health:
-        bar_count = 4
-        active_bars = int(bar_count * health_ratio)
-        for i in range(bar_count):
-            angle = -60 + i * 40  # centered at top
-            radians = math.radians(angle)
-            inner_r = ARENA_RADIUS - 8
-            outer_r = ARENA_RADIUS + 8
-
-            x1 = ARENA_CENTER[0] + inner_r * math.cos(radians)
-            y1 = ARENA_CENTER[1] + inner_r * math.sin(radians)
-            x2 = ARENA_CENTER[0] + outer_r * math.cos(radians)
-            y2 = ARENA_CENTER[1] + outer_r * math.sin(radians)
-
-            color = (255, 80, 80) if i < active_bars else (80, 80, 80)
-            pygame.draw.line(screen, color, (x1, y1), (x2, y2), 4)
+    # More accurate scale
+    scale = round((radius * 2 * 1.25) / base_size)
+    scaled = pygame.transform.scale(arena_surface, (small_size * scale, small_size * scale))
+    rect = scaled.get_rect(center=center)
+    screen.blit(scaled, rect)

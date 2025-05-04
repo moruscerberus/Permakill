@@ -1,6 +1,7 @@
 import pygame
 import math
 from settings import *
+from core.assets import Assets
 
 class Reward:
     def __init__(self, reward_data, position, on_claim):
@@ -39,11 +40,10 @@ class Reward:
         if self.health <= 0:
             self.claim()
 
-
-
     def claim(self):
         self.claimed = True
         self.on_claim(self)
+        Assets.sounds['powerup'].play()
 
     def draw(self, screen, camera):
         # Bounce effect
@@ -59,4 +59,3 @@ class Reward:
         desc_surf = self.font.render(self.description, True, (180, 180, 180))
         screen.blit(desc_surf, desc_surf.get_rect(center=camera.apply((self.pos.x, self.pos.y - 40))))
         screen.blit(name_surf, name_surf.get_rect(center=camera.apply((self.pos.x, self.pos.y - 24))))
-

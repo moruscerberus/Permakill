@@ -59,8 +59,7 @@ class Player:
             self.time_since_last_shot = 0
             return True
         return False
-    
-    
+
     def shoot(self):
         mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
         direction = (mouse_pos - self.pos).normalize()
@@ -79,8 +78,7 @@ class Player:
         self.bullets.append(Bullet(left_gun, left_dir, self.bullet_speed))
         self.bullets.append(Bullet(right_gun, right_dir, self.bullet_speed))
 
-
-
+        Assets.sounds['shoot'].play()
 
     def take_damage(self, amount):
         if self.health <= 0:
@@ -88,6 +86,7 @@ class Player:
         self.health = max(0, self.health - amount)
         self.time_since_hit = 0
         print(f"[DAMAGE] Took {amount}, health: {self.health}")
+        Assets.sounds['hit'].play()
 
     def draw(self, screen, camera):
         image = Assets.get('player')

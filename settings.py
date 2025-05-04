@@ -1,7 +1,7 @@
 # settings.py
 
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 900
+HEIGHT = 700
 FPS = 60
 
 PLAYER_SPEED = 4

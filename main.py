@@ -58,24 +58,19 @@ while running:
         if not transition.is_transitioning():
             manager.handle_event(event)
 
+    screen.fill(BLACK)
     manager.update(dt)
-    transition.update(dt)
-
     manager.draw()
+    transition.update(dt)
     transition.draw()
 
     # Update and draw swaying, rotating cursor
     target = pygame.mouse.get_pos()
     cursor_pos += (pygame.Vector2(target) - cursor_pos) * 0.3
-
-    mouse_x = target[0]
-    dx = mouse_x - prev_mouse_x
-    prev_mouse_x = mouse_x
-
-    # Calculate and smooth cursor rotation
-    target_angle = max(-45, min(45, dx * 2))
+    dx = target[0] - prev_mouse_x
+    prev_mouse_x = target[0]
+    target_angle = max(-35, min(35, dx * 2))
     cursor_angle += (target_angle - cursor_angle) * 0.3
-
     draw_cursor(cursor_pos, cursor_angle)
 
     pygame.display.flip()

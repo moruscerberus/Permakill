@@ -19,7 +19,6 @@ class GamePlayState:
 
         self.font = Assets.fonts['main']
 
-
         self.rewards_data = load_rewards()
         self.rewards = []
         self.in_reward_phase = False
@@ -120,7 +119,7 @@ class GamePlayState:
 
         if self.player.try_shoot():
             self.camera.shake(intensity=2, duration=0.05)
-            self.ring_pulse = 12
+            self.ring_pulse = 6  # Decreased from 12
 
         for fx in self.effects[:]:
             fx.update(dt)
@@ -179,6 +178,7 @@ class GamePlayState:
                         self.score += 50
                         self.camera.shake(intensity=6, duration=0.2)
                         self.effects.append(HitEffect(enemy.pos))
+                        Assets.sounds['explode'].play()
                     if bullet in self.player.bullets:
                         self.player.bullets.remove(bullet)
                     break
@@ -189,8 +189,9 @@ class GamePlayState:
                     enemy.explode()
                     self.player.take_damage(30)
                     self.camera.shake(intensity=10, duration=0.3)
-                    self.ring_pulse = 25
+                    self.ring_pulse = 15  # Decreased from 25
                     self.show_health_timer = 2.0
+                    Assets.sounds['explode'].play()
 
         self.enemies = [e for e in self.enemies if not (isinstance(e, BomberEnemy) and e.exploded)]
 
@@ -199,7 +200,7 @@ class GamePlayState:
                 if self.player.time_since_hit >= self.player.damage_cooldown:
                     self.player.take_damage(10)
                     self.player.time_since_hit = 0
-                    self.ring_pulse = 20
+                    self.ring_pulse = 10  # Decreased from 20
                     self.show_health_timer = 2.0
 
         for enemy in self.enemies:
@@ -207,7 +208,7 @@ class GamePlayState:
                 if bullet.pos.distance_to(self.player.pos) < bullet.radius + self.player.radius:
                     self.player.take_damage(10)
                     enemy.bullets.remove(bullet)
-                    self.ring_pulse = 20
+                    self.ring_pulse = 10  # Decreased from 20
                     self.show_health_timer = 2.0
 
     def draw(self):
