@@ -78,7 +78,8 @@ class Player:
         self.bullets.append(Bullet(left_gun, left_dir, self.bullet_speed))
         self.bullets.append(Bullet(right_gun, right_dir, self.bullet_speed))
 
-        Assets.sounds['shoot'].play()
+        if Assets.sound_enabled:
+            Assets.sounds['shoot'].play()
 
     def take_damage(self, amount):
         if self.health <= 0:
@@ -86,7 +87,8 @@ class Player:
         self.health = max(0, self.health - amount)
         self.time_since_hit = 0
         print(f"[DAMAGE] Took {amount}, health: {self.health}")
-        Assets.sounds['hit'].play()
+        if Assets.sound_enabled:
+            Assets.sounds['hit'].play()
 
     def draw(self, screen, camera):
         image = Assets.get('player')

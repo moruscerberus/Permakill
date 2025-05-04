@@ -178,10 +178,12 @@ class GamePlayState:
                         self.score += 50
                         self.camera.shake(intensity=6, duration=0.2)
                         self.effects.append(HitEffect(enemy.pos))
-                        Assets.sounds['explode'].play()
+                        if Assets.sound_enabled:
+                            Assets.sounds['explode'].play()
                     if bullet in self.player.bullets:
                         self.player.bullets.remove(bullet)
                     break
+
 
         for enemy in self.enemies[:]:
             if isinstance(enemy, BomberEnemy) and not enemy.exploded:
@@ -189,9 +191,10 @@ class GamePlayState:
                     enemy.explode()
                     self.player.take_damage(30)
                     self.camera.shake(intensity=10, duration=0.3)
-                    self.ring_pulse = 15  # Decreased from 25
+                    self.ring_pulse = 15
                     self.show_health_timer = 2.0
-                    Assets.sounds['explode'].play()
+                    if Assets.sound_enabled:
+                        Assets.sounds['explode'].play()
 
         self.enemies = [e for e in self.enemies if not (isinstance(e, BomberEnemy) and e.exploded)]
 

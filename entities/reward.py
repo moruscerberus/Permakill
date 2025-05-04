@@ -43,7 +43,8 @@ class Reward:
     def claim(self):
         self.claimed = True
         self.on_claim(self)
-        Assets.sounds['powerup'].play()
+        if Assets.sound_enabled:
+            Assets.sounds['powerup'].play()
 
     def draw(self, screen, camera):
         # Bounce effect

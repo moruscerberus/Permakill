@@ -12,15 +12,33 @@ class MenuState:
         self.screen = screen
         self.font = Assets.fonts['main']
         self.buttons = self.create_buttons()
+        self.feedback_message = ""
+        self.feedback_timer = 0
 
     def create_buttons(self):
         center_x, center_y = ARENA_CENTER
         return [
             {'label': 'START', 'pos': (center_x, center_y - 40), 'action': lambda: self.manager.set_state('gameplay')},
             {'label': 'CREDITS', 'pos': (center_x, center_y + 40), 'action': lambda: self.manager.set_state('settings')},
-            {'label': '♫', 'pos': (center_x - 100, center_y), 'action': lambda: print('Music toggle')},
-            {'label': '🔊', 'pos': (center_x + 100, center_y), 'action': lambda: print('Sound toggle')},
+            {'label': '♫', 'pos': (center_x - 100, center_y), 'action': self.toggle_music},
+            {'label': '🔊', 'pos': (center_x + 100, center_y), 'action': self.toggle_sound},
         ]
+
+    def toggle_sound(self):
+        Assets.sound_enabled = not getattr(Assets, 'sound_enabled', True)
+        status = "ON" if Assets.sound_enabled else "OFF"
+        self.feedback_message = f"SOUND: {status}"
+        self.feedback_timer = 1.5
+        if Assets.sound_enabled:
+            Assets.sounds['click'].play()
+        print(f"Sound {status.lower()}")
+
+    def toggle_music(self):
+        Assets.toggle_music()
+        status = "ON" if Assets.music_enabled else "OFF"
+        self.feedback_message = f"MUSIC: {status}"
+        self.feedback_timer = 1.5
+        print(f"Music {status.lower()}")
 
     def enter(self):
         pass
@@ -29,7 +47,8 @@ class MenuState:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for btn in self.buttons:
                 if self.is_hovering(btn):
-                    Assets.sounds['click'].play()
+                    if getattr(Assets, 'sound_enabled', True):
+                        Assets.sounds['click'].play()
                     btn['action']()
 
     def is_hovering(self, button):
@@ -38,7 +57,10 @@ class MenuState:
         return abs(mx - bx) < 50 and abs(my - by) < 20
 
     def update(self, dt):
-        pass
+        if self.feedback_timer > 0:
+            self.feedback_timer -= dt
+            if self.feedback_timer <= 0:
+                self.feedback_message = ""
 
     def draw_button(self, screen, label, pos, hovered):
         x, y = pos
@@ -59,7 +81,14 @@ class MenuState:
             py = cy + ry * math.sin(radians)
             points.append((px, py))
 
-        color = WHITE if not hovered else (200, 200, 255)
+        # Red outline if sound/music is off and this is the toggle
+        if label == '♫' and not Assets.music_enabled:
+            color = (255, 80, 80)
+        elif label == '🔊' and not Assets.sound_enabled:
+            color = (255, 80, 80)
+        else:
+            color = WHITE if not hovered else (200, 200, 255)
+
         pygame.draw.polygon(outline_surface, color, points, 1)
 
         # Scale up the outline
@@ -68,10 +97,21 @@ class MenuState:
         rect = scaled_outline.get_rect(center=(x, y))
         screen.blit(scaled_outline, rect)
 
-        # Draw the label
-        text_surf = self.font.render(label, True, WHITE)
-        text_rect = text_surf.get_rect(center=(x, y))
-        screen.blit(text_surf, text_rect)
+        # Draw icon or text
+        if label == '🔊':
+            icon_key = 'audio_on' if getattr(Assets, 'sound_enabled', True) else 'audio_off'
+            icon = Assets.images.get(icon_key)
+            if icon:
+                screen.blit(icon, icon.get_rect(center=(x, y)))
+        elif label == '♫':
+            icon_key = 'music_on' if getattr(Assets, 'music_enabled', True) else 'music_off'
+            icon = Assets.images.get(icon_key)
+            if icon:
+                screen.blit(icon, icon.get_rect(center=(x, y)))
+        else:
+            text_surf = self.font.render(label, True, WHITE)
+            text_rect = text_surf.get_rect(center=(x, y))
+            screen.blit(text_surf, text_rect)
 
     def draw(self):
         self.screen.fill(BLACK)
@@ -89,3 +129,8 @@ class MenuState:
         for btn in self.buttons:
             hovered = self.is_hovering(btn)
             self.draw_button(self.screen, btn['label'], btn['pos'], hovered)
+
+        if self.feedback_message:
+            feedback_surf = self.font.render(self.feedback_message, True, (255, 255, 100))
+            rect = feedback_surf.get_rect(center=(WIDTH // 2, HEIGHT - 60))
+            self.screen.blit(feedback_surf, rect)
