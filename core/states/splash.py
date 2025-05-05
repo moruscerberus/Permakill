@@ -21,7 +21,7 @@ class SplashState:
     def update(self, dt):
         self.timer += dt
 
-        if self.phase == 0 and self.timer > 2.0:
+        if self.phase == 0 and self.timer > 3.0:
             self.phase = 1
             self.timer = 0
         elif self.phase == 1 and self.timer > 5.0 and not self.has_started_transition:

@@ -34,6 +34,11 @@ class Assets:
 
         cls.images['warning'] = pygame.transform.scale(pygame.image.load('assets/sprites/warning_triangle.png').convert_alpha(), (32, 32))
 
+        # === REWARD SPRITES ===
+        cls.images['reward_bullet'] = pygame.transform.scale(pygame.image.load('assets/sprites/reward_bullet.png').convert_alpha(), (64, 64))
+        cls.images['reward_health'] = pygame.transform.scale(pygame.image.load('assets/sprites/reward_health.png').convert_alpha(), (64, 64))
+        cls.images['reward_movement'] = pygame.transform.scale(pygame.image.load('assets/sprites/reward_movement.png').convert_alpha(), (64, 64))
+        # === FONTS ===
         cls.fonts = {}
         cls.fonts['main'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 32)
         cls.fonts['small'] = pygame.font.Font('assets/fonts/runescape_uf.ttf', 20)

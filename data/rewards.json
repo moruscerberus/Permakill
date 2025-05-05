@@ -1,33 +1,37 @@
 [
-    {
+  {
       "name": "Max Health +20",
       "description": "Increase your max health by 20.",
       "effect": "max_health",
-      "value": 20
-    },
-    {
+      "value": 20,
+      "type": "health"
+  },
+  {
       "name": "Health Regen",
       "description": "Regenerate 1 HP per second.",
       "effect": "regen",
-      "value": 1
-    },
-    {
+      "value": 1,
+      "type": "health"
+  },
+  {
       "name": "Bullet Speed +100",
       "description": "Your bullets move faster.",
       "effect": "bullet_speed",
-      "value": 100
-    },
-    {
+      "value": 100,
+      "type": "bullet"
+  },
+  {
       "name": "Fire Rate Boost",
       "description": "Shoot more often.",
       "effect": "shoot_cooldown",
-      "value": -0.05
-    },
-    {
+      "value": -0.05,
+      "type": "bullet"
+  },
+  {
       "name": "Move Speed +1",
       "description": "You move faster.",
       "effect": "move_speed",
-      "value": 1
-    }
-  ]
-  
+      "value": 1,
+      "type": "movement"
+  }
+]

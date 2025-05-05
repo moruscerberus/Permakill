@@ -19,8 +19,6 @@ class HitEffect:
         return self.lifetime <= 0
 
 
-
-
 class RewardBurstEffect:
     def __init__(self, pos):
         self.particles = []
@@ -50,3 +48,40 @@ class RewardBurstEffect:
 
     def is_dead(self):
         return self.lifetime <= 0
+
+
+class SpawnBurstEffect:
+    def __init__(self, pos):
+        self.pos = pygame.Vector2(pos)
+        self.timer = 0.25
+        self.elapsed = 0
+
+    def update(self, dt):
+        self.elapsed += dt
+
+    def is_dead(self):
+        return self.elapsed >= self.timer
+
+    def draw(self, screen, camera):
+        t = self.elapsed / self.timer
+        alpha = max(0, int(255 * (1 - t)))
+        base_size = 64  # more room for thick lines
+        scale_factor = 2  # final size: 128×128
+        line_width = 5    # super chunky ✧
+
+        color = (255, 255, 255, alpha)
+
+        # Draw on pixel canvas
+        low_res = pygame.Surface((base_size, base_size), pygame.SRCALPHA)
+        center = base_size // 2
+
+        pygame.draw.line(low_res, color, (0, center), (base_size, center), line_width)         # horizontal
+        pygame.draw.line(low_res, color, (center, 0), (center, base_size), line_width)         # vertical
+        pygame.draw.line(low_res, color, (0, 0), (base_size, base_size), line_width)           # diagonal ↘
+        pygame.draw.line(low_res, color, (0, base_size), (base_size, 0), line_width)           # diagonal ↗
+
+        # Pixel-perfect scale-up
+        burst = pygame.transform.scale(low_res, (base_size * scale_factor, base_size * scale_factor))
+        draw_pos = camera.apply(self.pos - pygame.Vector2(burst.get_width() // 2, burst.get_height() // 2))
+        screen.blit(burst, draw_pos)
+

@@ -40,6 +40,8 @@ cursor_pos = pygame.Vector2(pygame.mouse.get_pos())
 prev_mouse_x = cursor_pos.x
 cursor_angle = 0
 
+pygame.display.set_caption('Permakill')
+
 pygame.mouse.set_visible(False)
 
 def draw_cursor(pos, angle):

@@ -3,7 +3,7 @@ from settings import *
 from entities.player import Player
 from entities.enemy import BaseEnemy, SniperEnemy, BomberEnemy
 from entities.reward import Reward
-from entities.effects import HitEffect, RewardBurstEffect
+from entities.effects import HitEffect, RewardBurstEffect, SpawnBurstEffect
 from systems.arena import draw_arena
 from core.rewards import load_rewards, apply_reward
 from core.assets import Assets
@@ -18,6 +18,9 @@ class GamePlayState:
         self.screen = screen
 
         self.font = Assets.fonts['main']
+
+        self.DEV_TEST_REWARDS = False  # Set to True to test rewards instantly
+
 
         self.rewards_data = load_rewards()
         self.rewards = []
@@ -61,18 +64,35 @@ class GamePlayState:
     def start_wave(self):
         self.wave_timer = 0
         self.enemies_spawned = 0
-        self.enemies_to_spawn = 5 + self.wave_number * 3
-        self.wave_duration = 10 + self.wave_number * 2
-        self.spawn_interval = max(0.3, 1.2 - self.wave_number * 0.05)
-        print(f"--- Wave {self.wave_number} started ---")
+
+        if self.DEV_TEST_REWARDS:
+            print("[DEV] Skipping wave — entering reward phase")
+            self.enter_reward_phase()
+            return
+
+        # Slightly fewer enemies per wave
+        self.enemies_to_spawn = 20 + self.wave_number * 30
+
+        # Shorter wave durations
+        self.wave_duration = 12 + self.wave_number * 2
+
+        # Fast spawn rate
+        self.spawn_interval = max(0.05, 0.5 - self.wave_number * 0.015)
+
+        print(f"--- Wave {self.wave_number} started with {self.enemies_to_spawn} enemies ---")
+
+
+
 
     def spawn_enemy(self):
-        if self.wave_number >= 5 and random.random() < 0.2:
+        roll = random.random()
+        if roll < 0.2:
             return BomberEnemy(self.player.pos)
-        elif self.wave_number >= 2 and random.random() < 0.3:
+        elif roll < 0.5:
             return SniperEnemy(self.player.pos)
         else:
             return BaseEnemy(self.player.pos)
+
 
     def player_is_dead(self):
         return self.player.health <= 0
@@ -81,17 +101,22 @@ class GamePlayState:
         self.in_reward_phase = True
         self.reward_claimed = False
 
-        chosen = random.sample(self.rewards_data, 3)
+        # Choose 2 random rewards
+        chosen = random.sample(self.rewards_data, 2)
+
+        # Calculate positions so they are centered on screen
+        spacing = 140
+        center_x = WIDTH // 2
         positions = [
-            (WIDTH // 2 - 120, HEIGHT // 2),
-            (WIDTH // 2, HEIGHT // 2),
-            (WIDTH // 2 + 120, HEIGHT // 2)
+            (center_x - spacing // 2, HEIGHT // 2),
+            (center_x + spacing // 2, HEIGHT // 2)
         ]
 
         for reward_data, pos in zip(chosen, positions):
             reward = Reward(reward_data, pos, self.claim_reward)
             reward.on_shake = lambda intensity, cam=self.camera: cam.shake(intensity=intensity, duration=0.1)
             self.rewards.append(reward)
+
 
     def claim_reward(self, reward):
         if self.reward_claimed:
@@ -109,7 +134,11 @@ class GamePlayState:
     def update(self, dt):
         if self.player_is_dead() and not self.dead:
             self.dead = True
-            self.manager.set_state("game_over")
+            self.time_scale = 0.2
+            self.camera.shake(intensity=20, duration=0.6)  # 🔥 BIG shake
+            pygame.time.set_timer(pygame.USEREVENT + 1, 800)
+
+
 
         if self.dead:
             return
@@ -138,9 +167,12 @@ class GamePlayState:
             if self.enemies_spawned < self.enemies_to_spawn:
                 self.spawn_timer += dt
                 if self.spawn_timer >= self.spawn_interval:
-                    self.enemies.append(self.spawn_enemy())
+                    enemy = self.spawn_enemy()
+                    self.enemies.append(enemy)
+                    self.effects.append(SpawnBurstEffect(enemy.pos))  # ✅ add flash effect
                     self.spawn_timer = 0
                     self.enemies_spawned += 1
+
 
             if self.wave_timer >= self.wave_duration:
                 self.pending_reward_trigger = True
@@ -248,4 +280,6 @@ class GamePlayState:
         pygame.draw.rect(self.screen, WHITE, (bar_x, bar_y, bar_width, bar_height), 2)
 
     def handle_event(self, event):
-        pass
+        if event.type == pygame.USEREVENT + 1:
+            self.manager.set_state("game_over")
+

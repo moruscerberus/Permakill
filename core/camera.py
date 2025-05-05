@@ -1,5 +1,3 @@
-# core/camera.py
-
 import pygame
 import random
 
@@ -22,4 +20,9 @@ class Camera:
         self.shake_timer = duration
 
     def apply(self, pos):
+        """Convert world position to screen position."""
         return pos + self.offset
+
+    def reverse_apply(self, screen_pos):
+        """Convert screen position to world position."""
+        return pygame.Vector2(screen_pos) - self.offset
