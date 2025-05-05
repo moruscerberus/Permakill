@@ -1,5 +1,6 @@
 # core/game.py
 
+from core.assets import Assets
 from settings import *
 from entities.player import Player
 from entities.enemy import Enemy
@@ -14,8 +15,8 @@ class Game:
         self.spawn_timer = 0
         self.spawn_interval = 1.5
         self.score = 0
-        self.font = pygame.font.SysFont("consolas", 32, bold=True)
-
+        self.font = Assets.fonts['main']
+        
     def update(self, dt):
         self.player.update(dt)
 

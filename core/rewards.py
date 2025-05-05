@@ -1,10 +1,8 @@
 # core/rewards.py
+from core.assets import Assets
 
-import json
-
-def load_rewards(path="data/rewards.json"):
-    with open(path) as f:
-        return json.load(f)
+def load_rewards():
+    return Assets.jsons["rewards"]
 
 def apply_reward(player, reward):
     effect = reward["effect"]
@@ -14,10 +12,10 @@ def apply_reward(player, reward):
         player.max_health += value
         player.health += value
     elif effect == "regen":
-        player.regen = value  # Assume you add regen to Player later
+        player.regen = value
     elif effect == "bullet_speed":
         player.bullet_speed += value
     elif effect == "shoot_cooldown":
-        player.shoot_cooldown = max(0.05, player.shoot_cooldown + value)  # negative = faster
+        player.shoot_cooldown = max(0.05, player.shoot_cooldown + value)
     elif effect == "move_speed":
         player.move_speed += value
